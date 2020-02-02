@@ -27,6 +27,14 @@ class AlphaBetaAgent(agent.Agent):
         """Search for the best move (choice of column for the token)"""
         # Your code here
 
+    #Gives a score to a supplied board state
+    #
+    #PARAM [board.Board] brd: the board state to evaluate
+    #RETURN [int]: the score of the board
+    def score_board(self, brd):
+        """Scores the given board according to benchmarks"""
+        #TODO Implement Function
+
     # Get the successors of the given board.
     #
     # PARAM [board.Board] brd: the board state
