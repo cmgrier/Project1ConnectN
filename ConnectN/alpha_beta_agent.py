@@ -34,6 +34,35 @@ class AlphaBetaAgent(agent.Agent):
     def score_board(self, brd):
         """Scores the given board according to benchmarks"""
         #TODO Implement Function
+        #total points equal distance from the center, with token values increasing the closer they are to the center
+        p1_center_priority = 0
+        p2_center_priority = 0
+        center_h = int((brd.h/2)-1)
+        center_w = int((brd.w/2)-1)
+
+    def within_boundaries(self,brd, h, w):
+        """
+        Checks if the cell is within the grid's boundaries
+        :param h: height coordinate of the cell
+        :param w: width coordinate of the cell
+        :return: True if the cell is within the grid
+        """
+        if h >=  brd.h or h < 0:
+            return False
+        elif w >= brd.w or w < 0:
+            return False
+        else:
+            return True
+
+     def get_ranged_neighbors(brd, h, w, range):
+         """
+         Gets the 8 neighbors of a cell from a set distance
+         :param h: height coordinate of the cell
+         :param w: width coordinate of the cell
+         :param range: the distance of the neighbors from the cell
+         :return: list of cell values
+         """
+
 
     # Get the successors of the given board.
     #
