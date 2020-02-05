@@ -1,5 +1,6 @@
 import math
 import agent
+import copy
 from ConnectN.board import Board #TODO DELETE
 ###########################
 # Alpha-Beta Search Agent #
@@ -34,75 +35,75 @@ class AlphaBetaAgent(agent.Agent):
     def score_board(self, brd):
         """Scores the given board according to benchmarks"""
         #TODO Implement Function
-        #total points equal distance from the center, with token values increasing the closer they are to the center
-        p1_center_priority = 0
-        p2_center_priority = 0
-        center_h = (brd.h//2)
-        center_w = (brd.w//2)
-        max_points = (brd.h+brd.w)//2
-        print(center_h,",",center_w)
-        print(max_points)
-        range = 0
-        neighbors = [1]
-        while len(neighbors) > 0:
-            neighbors = self.get_ranged_neighbors(brd,center_h,center_w,range)
-            for token in neighbors:
-                if brd.board[token[0]][token[1]] == 1:
-                    p1_center_priority += max_points - int(range*1.51)
-                elif brd.board[token[0]][token[1]] == 2:
-                    p2_center_priority += max_points - int(range*1.5)
+
+    def create_rings(self, brd):
+        """
+        Creates a list of rings which are represented as 4 corners. These rings start at the middle of the board
+        and pulsate out.
+        :param brd: the game board to base everything
+        :return: a list of rings
+        """
+        center_h = (brd.h // 2)
+        center_w = (brd.w // 2)
+        rings = []
+        range = 1
+        one_valid = True
+        while one_valid:
+            corners = []
+            if center_h - range < 0 and center_w - range < 0 and center_h + range >= brd.h and center_w + range >= brd.w:
+                one_valid = False
+                break
+
+            TL = (center_h - range, center_w - range)
+            TR = (center_h - range, center_w + range)
+            BL = (center_h + range, center_w - range)
+            BR = (center_h + range, center_w + range)
+
+            corners.append(copy.deepcopy(TL))
+            corners.append(copy.deepcopy(TR))
+            corners.append(copy.deepcopy(BL))
+            corners.append(copy.deepcopy(BR))
+            rings.append(copy.deepcopy(corners))
             range += 1
-        return (p1_center_priority,p2_center_priority)
+        return rings
 
-    def within_boundaries(self, brd, h, w):
+    def get_ring_value(self, brd, h, w, rings):
         """
-        Checks if the cell is within the grid's boundaries
-        :param h: height coordinate of the cell
-        :param w: width coordinate of the cell
-        :return: True if the cell is within the grid
+        Gets the value of the cell (h,w)  with its relation to ring location. The farther out from the middle cell
+        it is, the lower the value
+        :param brd: the game board grid
+        :param h: height value of the cell
+        :param w: width value of the cell
+        :param rings: a list of rings
+        :return:
         """
-        if h >= brd.h or h < 0:
-            return False
-        elif w >= brd.w or w < 0:
-            return False
+        center_h = (brd.h // 2)
+        center_w = (brd.w // 2)
+        max_points = ((brd.h + brd.w) // 2)
+        range = 1
+        if h == center_h and w == center_w:
+            return max_points + 1
         else:
-            return True
+            for ring in rings:
+                TL = ring[0]
+                TR = ring[1]
+                BL = ring[2]
+                BR = ring[3]
 
-    def get_ranged_neighbors(self, brd, h, w, dist):
-        """
-        Gets the 8 neighbors of a cell from a set distance
-        :param brd: the game board
-        :param h: height coordinate of the cell
-        :param w: width coordinate of the cell
-        :param dist: the distance of the neighbors from the cell
-        :return: list of valid cell coords
-        """
-        neighbors = set([])
-        if dist == 0 and self.within_boundaries(brd, h, w):
-            neighbors.add((h,w))
-            return neighbors
-        TL = (h-dist,w-dist)
-        TR = (h-dist,w+dist)
-        BL = (h+dist,w-dist)
-        BR = (h+dist,w+dist)
-        leftSide = BL[0]-TL[0] + 1
-        rightSide = BR[0]-TR[0] + 1
-        topSide = TR[1]-TL[1] + 1
-        bottomSide = BR[1]-BL[1] + 1
-        for height in range(leftSide):
-            if self.within_boundaries(brd,TL[0]+height,TL[1]):
-                neighbors.add((TL[0]+height,TL[1]))
-        for height in range(rightSide):
-            if self.within_boundaries(brd, TR[0] + height, TR[1]):
-                neighbors.add((TR[0] + height, TR[1]))
-        for width in range(topSide):
-            if self.within_boundaries(brd,TL[0],TL[1]+width):
-                neighbors.add((TL[0],TL[1]+width))
-        for width in range(bottomSide):
-            if self.within_boundaries(brd, BL[0], BL[1]+width):
-                neighbors.add((BL[0], BL[1]+width))
-        return neighbors
-
+                #Top of ring
+                if h == TL[0] and TL[1] <= w and TR[1] >= w:
+                    return max_points - int(range*1.5)
+                #Bottom of ring
+                if h == BL[0] and BL[1] <= w and BR[1] >= w:
+                    return max_points - int(range*1.5)
+                #Left of ring
+                if w == TL[1] and TL[0] <= h and BL[0] >= h:
+                    return max_points - int(range*1.5)
+                #Right of ring
+                if w == TR[1] and TR[0] <= h and BR[0] >= h:
+                    return max_points - int(range*1.5)
+                range += 1
+        return None
 
     # Get the successors of the given board.
     #
@@ -140,4 +141,5 @@ if __name__=="__main__":
     ]
     test = Board(board,6,5,4)
     abs = AlphaBetaAgent("srtidd",4)
-    print(abs.score_board(test))
+    print(abs.create_rings(test))
+    print(abs.get_ring_value(test,2,3,abs.create_rings(test)))
