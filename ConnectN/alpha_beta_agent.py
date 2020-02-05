@@ -9,7 +9,8 @@ import board
 
 class AlphaBetaAgent(agent.Agent):
     """Agent that uses alpha-beta search"""
-
+    big_negative = -10000000
+    big_positive = 100000000
     # Class constructor.
     #
     # PARAM [string] name:      the name of this player
@@ -18,6 +19,7 @@ class AlphaBetaAgent(agent.Agent):
         super().__init__(name)
         # Max search depth
         self.max_depth = max_depth
+
 
     # Pick a column.
     #
@@ -29,38 +31,46 @@ class AlphaBetaAgent(agent.Agent):
         """Search for the best move (choice of column for the token)"""
         # Your code here
         best_move = -1
-        best_move_val = -1000000000 #just dumb negative make it in a better way
+        best_move_val = self.big_negative
+        alpha = self.big_negative
+        beta = self.big_positive
         free_cols = brd.free_cols()
         for col in free_cols:
             new_board = brd.copy()
             # Add a token to the new board
             # (This internally changes nb.player, check the method definition!)
             new_board.add_token(col)
-            value = self.maximize(new_board, 0)
-            if(value > best_move_val):
+            value = self.maximize(new_board, 0, alpha, beta)
+            if value > best_move_val:
                 best_move = col
                 best_move_val = value
 
         return best_move
 
 
-    def minimize(self, brd, depth):
-        value = 10000000 # just dumb high make it in a better way
+    def minimize(self, brd, depth, alpha, beta):
+        value = self.big_positive
         if(depth == self.max_depth):
             return self.score_board(brd)
 
         successors = self.get_successors(brd)
         for new_board in successors:
-            value = min(value, self.maximize(new_board[0], depth+1))
+            value = min(value, self.maximize(new_board[0], depth+1, alpha, beta))
+            if value <= alpha:
+                return value
+            beta = min(beta, value)
         return value
 
-    def maximize(self, brd, depth):
-        value = -10000000  # just dumb negative make it in a better way
+    def maximize(self, brd, depth, alpha, beta):
+        value = self.big_negative
         if(depth == self.max_depth):
             return self.score_board(brd)
 
         for new_board in self.get_successors(brd):
-            value = max(value, self.minimize(new_board[0], depth+1))
+            value = max(value, self.minimize(new_board[0], depth+1, alpha, beta))
+            if value >= beta:
+                return value
+            alpha = max(alpha, value)
         return value
 
     #Gives a score to a supplied board state
