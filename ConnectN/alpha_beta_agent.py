@@ -1,12 +1,8 @@
 import math
 import agent
-<<<<<<< HEAD
 import copy
-from ConnectN.board import Board #TODO DELETE
-=======
 import board
 
->>>>>>> 3cd5dd2c135251a21a565865197786bfc2567aab
 ###########################
 # Alpha-Beta Search Agent #
 ###########################
@@ -32,6 +28,40 @@ class AlphaBetaAgent(agent.Agent):
     def go(self, brd):
         """Search for the best move (choice of column for the token)"""
         # Your code here
+        best_move = -1
+        best_move_val = -1000000000 #just dumb negative make it in a better way
+        free_cols = brd.free_cols()
+        for col in free_cols:
+            new_board = brd.copy()
+            # Add a token to the new board
+            # (This internally changes nb.player, check the method definition!)
+            new_board.add_token(col)
+            value = self.maximize(new_board, 0)
+            if(value > best_move_val):
+                best_move = col
+                best_move_val = value
+
+        return best_move
+
+
+    def minimize(self, brd, depth):
+        value = 10000000 # just dumb high make it in a better way
+        if(depth == self.max_depth):
+            return self.score_board(brd)
+
+        successors = self.get_successors(brd)
+        for new_board in successors:
+            value = min(value, self.maximize(new_board[0], depth+1))
+        return value
+
+    def maximize(self, brd, depth):
+        value = -10000000  # just dumb negative make it in a better way
+        if(depth == self.max_depth):
+            return self.score_board(brd)
+
+        for new_board in self.get_successors(brd):
+            value = max(value, self.minimize(new_board[0], depth+1))
+        return value
 
     #Gives a score to a supplied board state
     #
