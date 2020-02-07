@@ -1,19 +1,16 @@
 import math
 import agent
-<<<<<<< HEAD
 import copy
-from ConnectN.board import Board #TODO DELETE
-=======
 import board
 
->>>>>>> 3cd5dd2c135251a21a565865197786bfc2567aab
 ###########################
 # Alpha-Beta Search Agent #
 ###########################
 
 class AlphaBetaAgent(agent.Agent):
     """Agent that uses alpha-beta search"""
-
+    big_negative = -10000000
+    big_positive = 100000000
     # Class constructor.
     #
     # PARAM [string] name:      the name of this player
@@ -22,6 +19,7 @@ class AlphaBetaAgent(agent.Agent):
         super().__init__(name)
         # Max search depth
         self.max_depth = max_depth
+
 
     # Pick a column.
     #
@@ -32,6 +30,63 @@ class AlphaBetaAgent(agent.Agent):
     def go(self, brd):
         """Search for the best move (choice of column for the token)"""
         # Your code here
+        best_move = -1
+        best_move_val = self.big_negative
+        alpha = self.big_negative
+        beta = self.big_positive
+        free_cols = brd.free_cols()
+        for col in free_cols:
+            new_board = brd.copy()
+            # Add a token to the new board
+            # (This internally changes nb.player, check the method definition!)
+            new_board.add_token(col)
+            value = self.maximize(new_board, 0, alpha, beta)
+            if value > best_move_val:
+                best_move = col
+                best_move_val = value
+
+        return best_move
+
+    #
+    #The minimize half of minimax.
+    # PARAM [board.Board] brd: the game board for the state
+    # PARAM [int] depth: the current iteration
+    # PARAM [int] alpha: the alpha minimum for alpha beta pruning
+    # PARAM [int] beta: the beta maximum for alpha beta pruning
+    # RETURN [float]: the minimal value for the nodes leaf nodes
+    #
+    def minimize(self, brd, depth, alpha, beta):
+        value = self.big_positive
+        if(depth == self.max_depth):
+            return self.score_board(brd)
+
+        successors = self.get_successors(brd)
+        for new_board in successors:
+            value = min(value, self.maximize(new_board[0], depth+1, alpha, beta))
+            if value <= alpha:
+                return value
+            beta = min(beta, value)
+        return value
+
+        #
+        # The maximize half of minimax.
+        # PARAM [board.Board] brd: the game board for the state
+        # PARAM [int] depth: the current iteration
+        # PARAM [int] alpha: the alpha minimum for alpha beta pruning
+        # PARAM [int] beta: the beta maximum for alpha beta pruning
+        # RETURN [float]: the maximum value for the nodes leaf nodes
+        #
+    def maximize(self, brd, depth, alpha, beta):
+        value = self.big_negative
+        if(depth == self.max_depth):
+            return self.score_board(brd)
+
+        for new_board in self.get_successors(brd):
+            value = max(value, self.minimize(new_board[0], depth+1, alpha, beta))
+            if value >= beta:
+                return value
+            alpha = max(alpha, value)
+        return value
 
     #Gives a score to a supplied board state
     #
