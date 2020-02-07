@@ -47,7 +47,14 @@ class AlphaBetaAgent(agent.Agent):
 
         return best_move
 
-
+    #
+    #The minimize half of minimax.
+    # PARAM [board.Board] brd: the game board for the state
+    # PARAM [int] depth: the current iteration
+    # PARAM [int] alpha: the alpha minimum for alpha beta pruning
+    # PARAM [int] beta: the beta maximum for alpha beta pruning
+    # RETURN [float]: the minimal value for the nodes leaf nodes
+    #
     def minimize(self, brd, depth, alpha, beta):
         value = self.big_positive
         if(depth == self.max_depth):
@@ -61,6 +68,14 @@ class AlphaBetaAgent(agent.Agent):
             beta = min(beta, value)
         return value
 
+        #
+        # The maximize half of minimax.
+        # PARAM [board.Board] brd: the game board for the state
+        # PARAM [int] depth: the current iteration
+        # PARAM [int] alpha: the alpha minimum for alpha beta pruning
+        # PARAM [int] beta: the beta maximum for alpha beta pruning
+        # RETURN [float]: the maximum value for the nodes leaf nodes
+        #
     def maximize(self, brd, depth, alpha, beta):
         value = self.big_negative
         if(depth == self.max_depth):
