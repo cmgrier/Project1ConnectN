@@ -136,8 +136,8 @@ class AlphaBetaAgent(agent.Agent):
                 rings = self.create_rings(brd)
                 for r in range(0, brd.h):
                     for c in range(0, brd.w):
-                        score += self.get_ring_value(brd, r, c, rings)
-                        score += self.evaluate_token(brd, r, c)
+                        #score += self.get_ring_value(brd, r, c, rings)
+                        score += self.evaluate_token(brd, r, c) * 4
                         score += self.two_move_setup(brd, r, c, self.player) * 100
             return score
         else:
@@ -155,6 +155,10 @@ class AlphaBetaAgent(agent.Agent):
             if copy.get_outcome() != 0:
                 return col
         return -1
+
+    def two_move_win(self, brd, r, c):
+        token = brd.board[r][c]
+
 
     # this function may be able to be removed, disregard for now. Also it doesn't cover all 2 move setups
     def two_move_setup(self, brd, r, c, player):
@@ -346,10 +350,10 @@ class AlphaBetaAgent(agent.Agent):
         if token == 0:
             return 0
         t_power = 0
-        for dir in range(0, 7):
+        for dir in range(0, 4):
             t_power += self.look_for_line(brd, r, c, dir)
         if self.player != token:
-            return t_power * -1
+            return t_power * -50
         else:
             return t_power
 
@@ -384,7 +388,7 @@ class AlphaBetaAgent(agent.Agent):
         for i in range(0, brd.n):
             rx = r + ir * i
             cx = c + ic * i
-            if 0 < rx < brd.h and 0 < cx < brd.w:
+            if self.valid_coordinate(brd, rx, cx):
                 token = brd.board[rx][cx]
                 if token == origin and not blocked:
                     in_p_dir += 1
@@ -398,16 +402,16 @@ class AlphaBetaAgent(agent.Agent):
         for i in range(0, brd.n):
             rx = r - ir * i
             cx = c - ic * i
-            if 0 < rx < brd.h and 0 < cx < brd.w:
+            if self.valid_coordinate(brd, rx, cx):
                 token = brd.board[rx][cx]
                 if token == origin and not blocked:
-                    in_p_dir += 1
+                    in_n_dir += 1
                 elif token == opponent:
                     blocked = True
                 elif not blocked:
                     n_open += 1
-
-        return in_p_dir + in_n_dir + .1 * (n_open + p_open)
+        val = math.pow(p_open, in_p_dir) + math.pow(n_open, in_n_dir) + in_p_dir + in_n_dir
+        return val
 
     # Get the successors of the given board.
     #
@@ -436,8 +440,8 @@ class AlphaBetaAgent(agent.Agent):
         return succ
 
 if __name__ == '__main__':
-    data = [[0, 0, 2, 2, 0, 0, 0],
-            [0, 0, 0, 1, 0, 0, 0],
+    data = [[0, 0, 2, 0, 2, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
