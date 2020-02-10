@@ -132,9 +132,11 @@ class AlphaBetaAgent(agent.Agent):
                 score += 1000
             elif self.one_play_away(brd, opp) != -1:
                 score -= 1000
-            if depth < 6:
+            if depth < 6: # this is to help speed of agent in higher depths
+                rings = self.create_rings(brd)
                 for r in range(0, brd.h):
                     for c in range(0, brd.w):
+                        score += self.get_ring_value(brd, r, c, rings)
                         score += self.evaluate_token(brd, r, c)
                         score += self.two_move_setup(brd, r, c, self.player) * 100
             return score
