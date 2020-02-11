@@ -136,7 +136,7 @@ class AlphaBetaAgent(agent.Agent):
                 rings = self.create_rings(brd)
                 for r in range(0, brd.h):
                     for c in range(0, brd.w):
-                        #score += self.get_ring_value(brd, r, c, rings)
+                        score += self.get_ring_value(brd, r, c, rings)
                         score += self.evaluate_token(brd, r, c) * 4
                         score += self.two_move_setup(brd, r, c, self.player) * 100
             return score
@@ -321,8 +321,14 @@ class AlphaBetaAgent(agent.Agent):
         center_w = (brd.w // 2)
         max_points = ((brd.h + brd.w) // 2)
         range = 1
+        if brd.board[h][w] == 0:
+            multi = 0
+        elif brd.board[h][w] != self.player:
+            multi = -1
+        else:
+            multi = 1
         if h == center_h and w == center_w:
-            return max_points + 1
+            return (max_points + 1)*multi
         else:
             for ring in rings:
                 TL = ring[0]
@@ -332,16 +338,16 @@ class AlphaBetaAgent(agent.Agent):
 
                 #Top of ring
                 if h == TL[0] and TL[1] <= w and TR[1] >= w:
-                    return max_points - int(range*1.5)
+                    return (max_points - int(range*1.5))*multi
                 #Bottom of ring
                 if h == BL[0] and BL[1] <= w and BR[1] >= w:
-                    return max_points - int(range*1.5)
+                    return (max_points - int(range*1.5))*multi
                 #Left of ring
                 if w == TL[1] and TL[0] <= h and BL[0] >= h:
-                    return max_points - int(range*1.5)
+                    return (max_points - int(range*1.5))*multi
                 #Right of ring
                 if w == TR[1] and TR[0] <= h and BR[0] >= h:
-                    return max_points - int(range*1.5)
+                    return (max_points - int(range*1.5))*multi
                 range += 1
         return None
 
@@ -442,18 +448,21 @@ class AlphaBetaAgent(agent.Agent):
 if __name__ == '__main__':
     data = [[0, 0, 2, 0, 2, 0, 0],
             [0, 0, 1, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0]]
     board = board.Board(data, 7, 6, 4)
     aba = AlphaBetaAgent("abba", 4)
     aba.player = 1
-    start = time.time()
-    play = aba.go(board)
-    end = time.time()
-    print("P1 puts token: " + str(play))
-    print("Time elapsed: " + str(end - start))
+    rigs = aba.create_rings(board)
+    print(aba.get_ring_value(board,3,4,rigs))
+    print(aba.score_board(board,3))
+    #start = time.time()
+    #play = aba.go(board)
+    #end = time.time()
+    #print("P1 puts token: " + str(play))
+    #print("Time elapsed: " + str(end - start))
 
     backup = [[0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
@@ -461,3 +470,4 @@ if __name__ == '__main__':
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0]]
+
